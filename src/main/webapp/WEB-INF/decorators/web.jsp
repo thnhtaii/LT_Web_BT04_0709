@@ -148,13 +148,6 @@
         </div>
     </main>
 
-    <!-- Footer -->
-    <footer class="footer-custom mt-auto">
-        <div class="container text-center">
-            <p class="mb-1 fw-semibold text-dark">Lập Trình Web - Bài Tập 04 (07/09) | Quản lý Profile với JPA &amp; SiteMesh</p>
-            <p class="mb-0 text-muted">&copy; 2026 Đỗ Thành Tài - All rights reserved.</p>
-        </div>
-    </footer>
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
