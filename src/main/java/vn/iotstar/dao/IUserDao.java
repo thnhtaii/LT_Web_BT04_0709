@@ -15,5 +15,11 @@ public interface IUserDao {
 
     User findByUsername(String username);
 
+    User findByEmail(String email);
+
+    boolean checkExistUsername(String username);
+
+    boolean checkExistEmail(String email);
+
     List<User> findAll();
 }

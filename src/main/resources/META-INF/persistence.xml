@@ -6,6 +6,9 @@
 
     <persistence-unit name="BT04_0709">
         <class>vn.iotstar.entity.User</class>
+        <class>vn.iotstar.entity.Category</class>
+        <class>vn.iotstar.entity.Product</class>
+        <class>vn.iotstar.entity.Video</class>
         <properties>
             <property name="jakarta.persistence.jdbc.url" value="jdbc:sqlserver://localhost:64590;databaseName=jakartaJPA;encrypt=true;trustServerCertificate=true" />
             <property name="jakarta.persistence.jdbc.driver" value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />

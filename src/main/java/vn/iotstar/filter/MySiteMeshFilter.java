@@ -7,10 +7,11 @@ public class MySiteMeshFilter extends ConfigurableSiteMeshFilter {
 
     @Override
     protected void applyCustomConfiguration(SiteMeshFilterBuilder builder) {
-        // SiteMesh mặc định dùng thư mục /WEB-INF/decorators/
-        // Do đó mapping "/web.jsp" sẽ trỏ chính xác đến /WEB-INF/decorators/web.jsp
+        // 01 Template Bootstrap Decorator duy nhất cho toàn bộ hệ thống
         builder.addDecoratorPath("/*", "/web.jsp")
                .addExcludedPath("/image*")
-               .addExcludedPath("/assets/*");
+               .addExcludedPath("/assets/*")
+               .addExcludedPath("/static/*")
+               .addExcludedPath("/uploads/*");
     }
 }

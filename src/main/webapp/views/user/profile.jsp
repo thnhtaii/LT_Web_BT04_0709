@@ -107,7 +107,7 @@
     </style>
 </head>
 <body>
-
+    <div class="container my-4">
     <!-- Header Section -->
     <div class="row justify-content-center mb-4">
         <div class="col-lg-10">
@@ -301,5 +301,6 @@
             document.getElementById('displayFullname').innerText = val ? val : 'Chưa cập nhật tên';
         });
     </script>
+    </div>
 </body>
 </html>
