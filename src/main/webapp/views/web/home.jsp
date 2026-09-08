@@ -16,10 +16,6 @@
             background-color: #f8fafc;
             color: #1e293b;
         }
-        .navbar-custom {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
         .hero-section {
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #1e40af 100%);
             color: white;

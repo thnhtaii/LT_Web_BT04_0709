@@ -16,10 +16,6 @@
             background-color: #f8fafc;
             color: #1e293b;
         }
-        .navbar-custom {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
         .page-header-bar {
             background: white;
             border-bottom: 1px solid #e2e8f0;

@@ -53,7 +53,12 @@
             font-weight: 800;
             font-size: 1.4rem;
             letter-spacing: -0.5px;
-            color: var(--dark-color) !important;
+            text-decoration: none;
+        }
+
+        .navbar-brand .brand-text {
+            color: #0f172a;
+            font-weight: 800;
         }
 
         .navbar-brand .brand-badge {
@@ -206,7 +211,7 @@
                 <span class="brand-badge">
                     <i class="fa-solid fa-cube"></i>
                 </span>
-                <span>DT SHOP</span>
+                <span class="brand-text">DT <span class="text-primary">SHOP</span></span>
             </a>
 
             <!-- Mobile Toggler -->
