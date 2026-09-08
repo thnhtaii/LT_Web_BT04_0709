@@ -368,12 +368,12 @@
                         <span class="fw-bold fs-5 text-white">DT SHOP</span>
                     </div>
                     <p class="small text-secondary mb-3">
-                        Hệ thống thương mại điện tử trực tuyến tích hợp JPA Hibernate, Jakarta EE 10, SQL Server và SiteMesh 3 Decorator với giao diện Bootstrap 5 hiện đại.
+                        Hệ thống mua sắm thiết bị công nghệ và điện tử thông minh, cam kết sản phẩm chính hãng, bảo hành uy tín và dịch vụ tận tâm.
                     </p>
                     <div class="d-flex gap-2">
-                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">JPA 3.0</span>
-                        <span class="badge bg-success-subtle text-success border border-success-subtle">SiteMesh 3</span>
-                        <span class="badge bg-info-subtle text-info border border-info-subtle">Bootstrap 5</span>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle">Chính hãng 100%</span>
+                        <span class="badge bg-success-subtle text-success border border-success-subtle">Giao hàng nhanh</span>
+                        <span class="badge bg-info-subtle text-info border border-info-subtle">Hỗ trợ 24/7</span>
                     </div>
                 </div>
 
@@ -396,25 +396,25 @@
                 </div>
 
                 <div class="col-lg-4 col-md-6">
-                    <h6 class="footer-title">Thông Tin Dự Án</h6>
+                    <h6 class="footer-title">Liên Hệ & Hỗ Trợ</h6>
                     <p class="small text-secondary mb-2">
-                        <i class="fa-solid fa-user-graduate me-2 text-primary"></i>Sinh viên: <strong>Đỗ Thanh Thành Tài</strong>
+                        <i class="fa-solid fa-phone me-2 text-primary"></i>Hotline: <strong>1900 8888</strong>
                     </p>
                     <p class="small text-secondary mb-2">
-                        <i class="fa-solid fa-id-card me-2 text-primary"></i>MSSV: <strong>24133050</strong>
+                        <i class="fa-solid fa-envelope me-2 text-primary"></i>Email: <strong>support@dtshop.vn</strong>
                     </p>
                     <p class="small text-secondary mb-2">
-                        <i class="fa-solid fa-layer-group me-2 text-primary"></i>Học phần: <strong>Lập trình Web - Bài tập 04</strong>
+                        <i class="fa-solid fa-location-dot me-2 text-primary"></i>Địa chỉ: <strong>TP. Hồ Chí Minh, Việt Nam</strong>
                     </p>
                 </div>
             </div>
 
             <div class="footer-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
                 <div>
-                    &copy; 2026 <strong>DT SHOP</strong>. Đỗ Thanh Thành Tài - 24133050. All rights reserved.
+                    &copy; 2026 <strong>DT SHOP</strong>. All rights reserved.
                 </div>
                 <div class="text-secondary small">
-                    Cấu hình SiteMesh Decorator 3 &bull; Bootstrap 5.3.3 Template
+                    Chính sách bảo mật &bull; Điều khoản dịch vụ
                 </div>
             </div>
         </div>
