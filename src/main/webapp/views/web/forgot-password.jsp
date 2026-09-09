@@ -65,12 +65,15 @@
             </div>
         </c:if>
 
-        <form action="<c:url value='/forgot-password'/>" method="POST">
+        <form action="<c:url value='/forgot-password'/>" method="POST" class="needs-validation" novalidate id="forgotForm">
             <div class="mb-4">
-                <label class="form-label small fw-semibold text-secondary">Địa chỉ Email tài khoản</label>
-                <div class="input-group">
+                <label class="form-label small fw-semibold text-secondary">Địa chỉ Email tài khoản <span class="text-danger">*</span></label>
+                <div class="input-group has-validation">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-regular fa-envelope text-muted"></i></span>
-                    <input type="email" name="email" class="form-control border-start-0" value="${email}" placeholder="email@domain.com" required autofocus>
+                    <input type="email" name="email" class="form-control border-start-0" 
+                           value="${email}" placeholder="email@domain.com" required autofocus
+                           pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$">
+                    <div class="invalid-feedback">Vui lòng nhập địa chỉ email hợp lệ.</div>
                 </div>
                 <div class="form-text small mt-1">Hệ thống sẽ gửi mã OTP 6 số tới email này.</div>
             </div>
@@ -86,6 +89,19 @@
             </a>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('forgotForm');
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    </script>
 
 
 </body>

@@ -87,40 +87,53 @@
             <p class="page-subtitle">Chỉnh sửa thông số, danh mục và hình ảnh cho sản phẩm #${product.productId}</p>
         </div>
 
+        <c:if test="${not empty error}">
+            <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm d-flex align-items-center gap-2 mb-4" role="alert">
+                <i class="fa-solid fa-triangle-exclamation fs-5 text-danger"></i>
+                <div><strong>Lỗi nhập liệu:</strong> <c:out value="${error}"/></div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
+
         <div class="card-custom">
             <div class="card-custom-header d-flex justify-content-between align-items-center">
                 <span><i class="fa-solid fa-pen-to-square text-primary me-2"></i> ${product.productName}</span>
                 <span class="badge bg-light text-dark border">ID: #${product.productId}</span>
             </div>
             <div class="card-custom-body">
-                <form action="<c:url value='/admin/product/update'/>" method="post" enctype="multipart/form-data">
+                <form action="<c:url value='/admin/product/update'/>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate id="productEditForm">
                     <input type="hidden" name="productId" value="${product.productId}">
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-8">
                             <label class="form-label fw-semibold text-secondary small">Tên Sản Phẩm <span class="text-danger">*</span></label>
-                            <input type="text" class="form-control form-control-lg" name="productName" value="${product.productName}" required>
+                            <input type="text" class="form-control form-control-lg" name="productName" value="${product.productName}" required minlength="2" maxlength="255">
+                            <div class="invalid-feedback">Tên sản phẩm bắt buộc và phải có từ 2 đến 255 ký tự.</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold text-secondary small">Danh Mục <span class="text-danger">*</span></label>
                             <select class="form-select form-select-lg" name="categoryId" required>
+                                <option value="" disabled>-- Chọn danh mục --</option>
                                 <c:forEach items="${categories}" var="c">
                                     <option value="${c.categoryId}" ${product.category != null && product.category.categoryId == c.categoryId ? 'selected' : ''}>
                                         ${c.categoryname}
                                     </option>
                                 </c:forEach>
                             </select>
+                            <div class="invalid-feedback">Vui lòng chọn danh mục cho sản phẩm.</div>
                         </div>
                     </div>
 
                     <div class="row g-3 mb-3">
                         <div class="col-md-4">
                             <label class="form-label fw-semibold text-secondary small">Giá Bán (VNĐ) <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" name="price" value="${product.price}" min="0" step="1000" required>
+                            <input type="number" class="form-control" name="price" value="${product.price}" min="1000" step="1000" required>
+                            <div class="invalid-feedback">Giá bán tối thiểu là 1.000 VNĐ.</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold text-secondary small">Số Lượng Kho <span class="text-danger">*</span></label>
-                            <input type="number" class="form-control" name="quantity" value="${product.quantity}" min="0" required>
+                            <input type="number" class="form-control" name="quantity" value="${product.quantity}" min="0" step="1" required>
+                            <div class="invalid-feedback">Số lượng tồn kho phải là số nguyên không âm (>= 0).</div>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label fw-semibold text-secondary small">Trạng Thái</label>
@@ -139,7 +152,8 @@
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-secondary small">Tải Ảnh Mới Thay Thế (nếu có)</label>
-                            <input type="file" class="form-control" name="images1" accept="image/*">
+                            <input type="file" class="form-control" name="images1" id="productEditImageFile" accept=".jpg,.jpeg,.png,.webp">
+                            <div class="form-text small">Chấp nhận JPG, PNG, WEBP (tối đa 5MB)</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-secondary small">Hoặc Cập Nhật URL Ảnh Trực Tiếp</label>
@@ -181,5 +195,39 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('productEditForm');
+            const fileInput = document.getElementById('productEditImageFile');
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function () {
+                    const file = this.files[0];
+                    if (file) {
+                        const validExts = ['.jpg', '.jpeg', '.png', '.webp'];
+                        const name = file.name.toLowerCase();
+                        if (!validExts.some(ext => name.endsWith(ext))) {
+                            alert('Định dạng ảnh không hợp lệ! Vui lòng chọn .jpg, .jpeg, .png hoặc .webp');
+                            this.value = '';
+                            return;
+                        }
+                        if (file.size > 5 * 1024 * 1024) {
+                            alert('Dung lượng ảnh vượt quá 5MB!');
+                            this.value = '';
+                        }
+                    }
+                });
+            }
+
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    </script>
 </body>
 </html>

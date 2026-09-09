@@ -66,6 +66,10 @@ public class AuthController extends HttpServlet {
         }
     }
 
+    private static final String EMAIL_REGEX = "^[A-Za-z0-9+_.-]+@([A-Za-z0-9.-]+\\.[A-Za-z]{2,})$";
+    private static final String USERNAME_REGEX = "^[a-zA-Z0-9_]{3,30}$";
+    private static final String OTP_REGEX = "^\\d{6}$";
+
     private void handleRegister(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String username = req.getParameter("username");
         String email = req.getParameter("email");
@@ -73,37 +77,73 @@ public class AuthController extends HttpServlet {
         String password = req.getParameter("password");
         String confirmPassword = req.getParameter("confirmPassword");
 
-        if (username == null || username.trim().isEmpty() ||
-            email == null || email.trim().isEmpty() ||
-            password == null || password.trim().isEmpty()) {
-            req.setAttribute("error", "Vui lòng điền đầy đủ các thông tin bắt buộc!");
+        username = (username != null) ? username.trim() : "";
+        email = (email != null) ? email.trim() : "";
+        fullname = (fullname != null) ? fullname.trim() : "";
+
+        req.setAttribute("username", username);
+        req.setAttribute("email", email);
+        req.setAttribute("fullname", fullname);
+
+        if (username.isEmpty() || email.isEmpty() || password == null || password.trim().isEmpty() || fullname.isEmpty()) {
+            req.setAttribute("error", "Vui lòng điền đầy đủ tất cả các trường bắt buộc!");
+            req.getRequestDispatcher("/views/web/register.jsp").forward(req, resp);
+            return;
+        }
+
+        if (!username.matches(USERNAME_REGEX)) {
+            req.setAttribute("error", "Tên đăng nhập từ 3 - 30 ký tự, chỉ chứa chữ cái, chữ số và dấu gạch dưới (_)! Không chứa dấu cách hay ký tự đặc biệt.");
+            req.getRequestDispatcher("/views/web/register.jsp").forward(req, resp);
+            return;
+        }
+
+        if (!email.matches(EMAIL_REGEX)) {
+            req.setAttribute("error", "Địa chỉ email không đúng định dạng hợp lệ (ví dụ: user@example.com)!");
+            req.getRequestDispatcher("/views/web/register.jsp").forward(req, resp);
+            return;
+        }
+
+        if (fullname.length() < 2 || fullname.length() > 100) {
+            req.setAttribute("error", "Họ và tên phải có độ dài từ 2 đến 100 ký tự!");
+            req.getRequestDispatcher("/views/web/register.jsp").forward(req, resp);
+            return;
+        }
+
+        if (password.length() < 6) {
+            req.setAttribute("error", "Mật khẩu phải có độ dài tối thiểu từ 6 ký tự trở lên!");
             req.getRequestDispatcher("/views/web/register.jsp").forward(req, resp);
             return;
         }
 
         if (!password.equals(confirmPassword)) {
-            req.setAttribute("error", "Mật khẩu xác nhận không trùng khớp!");
-            req.setAttribute("username", username);
-            req.setAttribute("email", email);
-            req.setAttribute("fullname", fullname);
+            req.setAttribute("error", "Mật khẩu xác nhận không trùng khớp với mật khẩu đã nhập!");
             req.getRequestDispatcher("/views/web/register.jsp").forward(req, resp);
             return;
         }
 
         try {
-            User user = new User(username.trim(), email.trim(), "", fullname != null ? fullname.trim() : "");
+            if (userService.findByUsername(username) != null) {
+                req.setAttribute("error", "Tên đăng nhập '" + username + "' đã tồn tại trên hệ thống. Vui lòng chọn tên khác!");
+                req.getRequestDispatcher("/views/web/register.jsp").forward(req, resp);
+                return;
+            }
+
+            if (userService.findByEmail(email) != null) {
+                req.setAttribute("error", "Địa chỉ email '" + email + "' đã được đăng ký cho tài khoản khác!");
+                req.getRequestDispatcher("/views/web/register.jsp").forward(req, resp);
+                return;
+            }
+
+            User user = new User(username, email, "", fullname);
             userService.register(user, password);
 
             HttpSession session = req.getSession();
-            session.setAttribute("otpEmail", email.trim());
+            session.setAttribute("otpEmail", email);
             session.setAttribute("otpPurpose", "activate");
 
             resp.sendRedirect(req.getContextPath() + "/verify-otp?msg=otp_sent");
         } catch (Exception e) {
             req.setAttribute("error", e.getMessage());
-            req.setAttribute("username", username);
-            req.setAttribute("email", email);
-            req.setAttribute("fullname", fullname);
             req.getRequestDispatcher("/views/web/register.jsp").forward(req, resp);
         }
     }
@@ -116,28 +156,37 @@ public class AuthController extends HttpServlet {
             email = sessionEmail;
         }
 
+        email = (email != null) ? email.trim() : "";
         String otp = req.getParameter("otp");
-        if (email == null || email.trim().isEmpty() || otp == null || otp.trim().isEmpty()) {
-            req.setAttribute("error", "Vui lòng nhập đầy đủ email và mã OTP!");
-            req.setAttribute("email", email);
+        otp = (otp != null) ? otp.trim() : "";
+
+        req.setAttribute("email", email);
+        req.setAttribute("otp", otp);
+
+        if (email.isEmpty() || otp.isEmpty()) {
+            req.setAttribute("error", "Vui lòng nhập đầy đủ địa chỉ email và mã OTP 6 chữ số!");
+            req.getRequestDispatcher("/views/web/verify-otp.jsp").forward(req, resp);
+            return;
+        }
+
+        if (!otp.matches(OTP_REGEX)) {
+            req.setAttribute("error", "Mã xác thực OTP phải gồm đúng 6 chữ số (0-9)!");
             req.getRequestDispatcher("/views/web/verify-otp.jsp").forward(req, resp);
             return;
         }
 
         try {
-            boolean success = userService.verifyOtp(email.trim(), otp.trim());
+            boolean success = userService.verifyOtp(email, otp);
             if (success) {
                 session.removeAttribute("otpEmail");
                 session.removeAttribute("otpPurpose");
                 resp.sendRedirect(req.getContextPath() + "/login?msg=activated");
             } else {
-                req.setAttribute("error", "Xác thực không thành công. Vui lòng thử lại!");
-                req.setAttribute("email", email);
+                req.setAttribute("error", "Mã OTP không chính xác hoặc đã hết hạn (5 phút). Vui lòng thử lại!");
                 req.getRequestDispatcher("/views/web/verify-otp.jsp").forward(req, resp);
             }
         } catch (Exception e) {
             req.setAttribute("error", e.getMessage());
-            req.setAttribute("email", email);
             req.getRequestDispatcher("/views/web/verify-otp.jsp").forward(req, resp);
         }
     }
@@ -208,20 +257,34 @@ public class AuthController extends HttpServlet {
 
     private void handleForgotPassword(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String email = req.getParameter("email");
-        if (email == null || email.trim().isEmpty()) {
-            req.setAttribute("error", "Vui lòng nhập email tài khoản của bạn!");
+        email = (email != null) ? email.trim() : "";
+        req.setAttribute("email", email);
+
+        if (email.isEmpty()) {
+            req.setAttribute("error", "Vui lòng nhập địa chỉ email tài khoản của bạn!");
+            req.getRequestDispatcher("/views/web/forgot-password.jsp").forward(req, resp);
+            return;
+        }
+
+        if (!email.matches(EMAIL_REGEX)) {
+            req.setAttribute("error", "Địa chỉ email không đúng định dạng hợp lệ!");
+            req.getRequestDispatcher("/views/web/forgot-password.jsp").forward(req, resp);
+            return;
+        }
+
+        if (userService.findByEmail(email) == null) {
+            req.setAttribute("error", "Địa chỉ email '" + email + "' không tồn tại trong hệ thống. Vui lòng kiểm tra lại!");
             req.getRequestDispatcher("/views/web/forgot-password.jsp").forward(req, resp);
             return;
         }
 
         try {
-            userService.sendForgotPasswordOtp(email.trim());
+            userService.sendForgotPasswordOtp(email);
             HttpSession session = req.getSession();
-            session.setAttribute("resetEmail", email.trim());
+            session.setAttribute("resetEmail", email);
             resp.sendRedirect(req.getContextPath() + "/reset-password?msg=otp_sent");
         } catch (Exception e) {
             req.setAttribute("error", e.getMessage());
-            req.setAttribute("email", email);
             req.getRequestDispatcher("/views/web/forgot-password.jsp").forward(req, resp);
         }
     }
@@ -234,33 +297,45 @@ public class AuthController extends HttpServlet {
             email = sessionEmail;
         }
 
+        email = (email != null) ? email.trim() : "";
         String otp = req.getParameter("otp");
+        otp = (otp != null) ? otp.trim() : "";
         String newPassword = req.getParameter("newPassword");
         String confirmPassword = req.getParameter("confirmPassword");
 
-        if (email == null || email.trim().isEmpty() ||
-            otp == null || otp.trim().isEmpty() ||
-            newPassword == null || newPassword.trim().isEmpty()) {
-            req.setAttribute("error", "Vui lòng điền đầy đủ các thông tin bắt buộc!");
-            req.setAttribute("email", email);
+        req.setAttribute("email", email);
+        req.setAttribute("otp", otp);
+
+        if (email.isEmpty() || otp.isEmpty() || newPassword == null || newPassword.trim().isEmpty()) {
+            req.setAttribute("error", "Vui lòng điền đầy đủ tất cả các thông tin bắt buộc!");
+            req.getRequestDispatcher("/views/web/reset-password.jsp").forward(req, resp);
+            return;
+        }
+
+        if (!otp.matches(OTP_REGEX)) {
+            req.setAttribute("error", "Mã OTP phải gồm đúng 6 chữ số (0-9)!");
+            req.getRequestDispatcher("/views/web/reset-password.jsp").forward(req, resp);
+            return;
+        }
+
+        if (newPassword.length() < 6) {
+            req.setAttribute("error", "Mật khẩu mới phải có tối thiểu từ 6 ký tự trở lên!");
             req.getRequestDispatcher("/views/web/reset-password.jsp").forward(req, resp);
             return;
         }
 
         if (!newPassword.equals(confirmPassword)) {
-            req.setAttribute("error", "Mật khẩu xác nhận không khớp!");
-            req.setAttribute("email", email);
+            req.setAttribute("error", "Mật khẩu xác nhận không khớp với mật khẩu mới!");
             req.getRequestDispatcher("/views/web/reset-password.jsp").forward(req, resp);
             return;
         }
 
         try {
-            userService.resetPassword(email.trim(), otp.trim(), newPassword);
+            userService.resetPassword(email, otp, newPassword);
             session.removeAttribute("resetEmail");
             resp.sendRedirect(req.getContextPath() + "/login?msg=reset_success");
         } catch (Exception e) {
             req.setAttribute("error", e.getMessage());
-            req.setAttribute("email", email);
             req.getRequestDispatcher("/views/web/reset-password.jsp").forward(req, resp);
         }
     }

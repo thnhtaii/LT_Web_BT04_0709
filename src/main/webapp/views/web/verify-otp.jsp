@@ -92,18 +92,22 @@
             </div>
         </c:if>
 
-        <form action="<c:url value='/verify-otp'/>" method="POST">
+        <form action="<c:url value='/verify-otp'/>" method="POST" class="needs-validation" novalidate id="otpForm">
             <div class="mb-3">
-                <label class="form-label small fw-semibold text-secondary">Địa chỉ Email</label>
-                <div class="input-group">
+                <label class="form-label small fw-semibold text-secondary">Địa chỉ Email <span class="text-danger">*</span></label>
+                <div class="input-group has-validation">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-regular fa-envelope text-muted"></i></span>
-                    <input type="email" name="email" class="form-control border-start-0" value="${email != null ? email : sessionScope.otpEmail}" placeholder="email@domain.com" required>
+                    <input type="email" name="email" class="form-control border-start-0" 
+                           value="${email != null ? email : sessionScope.otpEmail}" placeholder="email@domain.com" required>
+                    <div class="invalid-feedback">Vui lòng nhập địa chỉ email hợp lệ.</div>
                 </div>
             </div>
 
             <div class="mb-4">
-                <label class="form-label small fw-semibold text-secondary">Mã OTP (6 chữ số)</label>
-                <input type="text" name="otp" class="form-control otp-input" maxlength="6" placeholder="------" pattern="[0-9]{6}" required autofocus>
+                <label class="form-label small fw-semibold text-secondary">Mã OTP (6 chữ số) <span class="text-danger">*</span></label>
+                <input type="text" name="otp" id="otpInput" class="form-control otp-input" maxlength="6" 
+                       placeholder="------" pattern="^\d{6}$" inputmode="numeric" required autofocus autocomplete="one-time-code">
+                <div class="invalid-feedback text-center">Vui lòng nhập đúng 6 chữ số OTP.</div>
                 <div class="form-text text-center small mt-2">
                     <i class="fa-regular fa-clock me-1"></i> Mã có hiệu lực trong vòng 5 phút
                 </div>
@@ -127,6 +131,26 @@
             </a>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('otpForm');
+            const otpInput = document.getElementById('otpInput');
+
+            // Chỉ cho phép nhập số
+            otpInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    </script>
 
 </body>
 </html>

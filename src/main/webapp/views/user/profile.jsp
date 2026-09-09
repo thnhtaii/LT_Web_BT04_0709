@@ -153,7 +153,7 @@
     <!-- Main Content Form -->
     <div class="row justify-content-center">
         <div class="col-lg-10">
-            <form action="${pageContext.request.contextPath}/profile" method="post" enctype="multipart/form-data">
+            <form action="${pageContext.request.contextPath}/profile" method="post" enctype="multipart/form-data" class="needs-validation" novalidate id="profileForm">
                 <div class="row g-4">
                     <!-- Left Column: Avatar Preview -->
                     <div class="col-md-4">
@@ -169,14 +169,12 @@
                                              class="avatar-img" alt="Default Avatar">
                                     </c:otherwise>
                                 </c:choose>
-
-                                <!-- Trigger Upload Button -->
-                                <label for="imageFileInput" class="btn-upload-badge" title="Tải ảnh mới">
+                                <label for="imageFileInput" class="camera-badge" title="Đổi ảnh đại diện">
                                     <i class="fa-solid fa-camera"></i>
                                 </label>
                             </div>
 
-                            <h5 class="fw-bold mb-1 text-dark" id="displayFullname">
+                            <h5 class="fw-bold text-dark mt-3 mb-1" id="displayFullname">
                                 <c:out value="${user.fullname != null && !user.fullname.isEmpty() ? user.fullname : 'Chưa cập nhật tên'}" />
                             </h5>
                             <p class="text-muted small mb-3">@<c:out value="${user.username}" /></p>
@@ -186,8 +184,8 @@
                                 <label for="imageFileInput" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                                     <i class="fa-solid fa-upload me-1"></i> Chọn ảnh đại diện
                                 </label>
-                                <input type="file" class="d-none" id="imageFileInput" name="imageFile" accept="image/*">
-                                <div class="text-muted small mt-2" id="fileNameHint" style="font-size: 0.75rem;">Định dạng: JPG, PNG, WEBP (Tối đa 10MB)</div>
+                                <input type="file" class="d-none" id="imageFileInput" name="imageFile" accept=".jpg,.jpeg,.png,.webp">
+                                <div class="text-muted small mt-2" id="fileNameHint" style="font-size: 0.75rem;">Định dạng: JPG, PNG, WEBP (Tối đa 5MB)</div>
                             </div>
                         </div>
                     </div>
@@ -229,28 +227,32 @@
                                     <label for="fullnameInput" class="form-label">
                                         Họ và tên <span class="text-danger">*</span>
                                     </label>
-                                    <div class="input-group">
+                                    <div class="input-group has-validation">
                                         <span class="input-group-text bg-white text-muted border-end-0">
                                             <i class="fa-solid fa-signature"></i>
                                         </span>
                                         <input type="text" class="form-control border-start-0" id="fullnameInput" 
-                                               name="fullname" value="${user.fullname}" placeholder="Nhập họ và tên đầy đủ" required>
+                                               name="fullname" value="${user.fullname}" placeholder="Nhập họ và tên đầy đủ" 
+                                               required minlength="2" maxlength="100">
+                                        <div class="invalid-feedback">Họ và tên không được để trống (từ 2 - 100 ký tự).</div>
                                     </div>
                                 </div>
 
                                 <!-- Phone (Editable) -->
                                 <div class="col-12">
                                     <label for="phoneInput" class="form-label">
-                                        Số điện thoại <span class="text-danger">*</span>
+                                        Số điện thoại
                                     </label>
-                                    <div class="input-group">
+                                    <div class="input-group has-validation">
                                         <span class="input-group-text bg-white text-muted border-end-0">
                                             <i class="fa-solid fa-phone"></i>
                                         </span>
                                         <input type="tel" class="form-control border-start-0" id="phoneInput" 
-                                               name="phone" value="${user.phone}" placeholder="Ví dụ: 0912345678" pattern="[0-9]{9,11}">
+                                               name="phone" value="${user.phone}" placeholder="Ví dụ: 0912345678" 
+                                               pattern="^0[0-9]{9}$" maxlength="10">
+                                        <div class="invalid-feedback">Vui lòng nhập số điện thoại hợp lệ (10 chữ số bắt đầu bằng 0).</div>
                                     </div>
-                                    <small class="text-muted">Số điện thoại liên hệ (9 - 11 chữ số)</small>
+                                    <small class="text-muted">Số điện thoại liên hệ chuẩn Việt Nam (10 chữ số)</small>
                                 </div>
                             </div>
 
@@ -270,35 +272,58 @@
         </div>
     </div>
 
-    <!-- Live Preview Script -->
+    <!-- Live Preview & Validation Script -->
     <script>
-        document.getElementById('imageFileInput').addEventListener('change', function (e) {
-            const file = e.target.files[0];
-            if (file) {
-                // Kiểm tra dung lượng file (tối đa 10MB)
-                if (file.size > 10 * 1024 * 1024) {
-                    alert('Dung lượng ảnh vượt quá 10MB! Vui lòng chọn ảnh khác.');
-                    this.value = '';
-                    return;
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('profileForm');
+            const fileInput = document.getElementById('imageFileInput');
+
+            fileInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const validExtensions = ['.jpg', '.jpeg', '.png', '.webp'];
+                    const fileName = file.name.toLowerCase();
+                    const isValidExt = validExtensions.some(ext => fileName.endsWith(ext));
+
+                    if (!isValidExt) {
+                        alert('Định dạng ảnh không hợp lệ! Vui lòng chọn file .jpg, .jpeg, .png hoặc .webp');
+                        this.value = '';
+                        return;
+                    }
+
+                    // Kiểm tra dung lượng file (tối đa 5MB)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Dung lượng ảnh vượt quá 5MB! Vui lòng chọn ảnh khác nhẹ hơn.');
+                        this.value = '';
+                        return;
+                    }
+
+                    // Hiển thị xem trước ảnh
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        document.getElementById('avatarPreview').src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+
+                    // Cập nhật tên file hiển thị
+                    document.getElementById('fileNameHint').innerHTML = 
+                        '<strong class="text-primary"><i class="fa-solid fa-file-image me-1"></i>' + file.name + '</strong>';
                 }
+            });
 
-                // Hiển thị xem trước ảnh ngay lập tức
-                const reader = new FileReader();
-                reader.onload = function (event) {
-                    document.getElementById('avatarPreview').src = event.target.result;
-                };
-                reader.readAsDataURL(file);
+            // Cập nhật họ tên realtime ở preview card khi gõ
+            document.getElementById('fullnameInput').addEventListener('input', function () {
+                const val = this.value.trim();
+                document.getElementById('displayFullname').innerText = val ? val : 'Chưa cập nhật tên';
+            });
 
-                // Cập nhật tên file hiển thị
-                document.getElementById('fileNameHint').innerHTML = 
-                    '<strong class="text-primary"><i class="fa-solid fa-file-image me-1"></i>' + file.name + '</strong>';
-            }
-        });
-
-        // Cập nhật họ tên realtime ở preview card khi gõ
-        document.getElementById('fullnameInput').addEventListener('input', function () {
-            const val = this.value.trim();
-            document.getElementById('displayFullname').innerText = val ? val : 'Chưa cập nhật tên';
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
         });
     </script>
     </div>

@@ -79,14 +79,56 @@ public class ProfileController extends HttpServlet {
         String fullname = req.getParameter("fullname");
         String phone = req.getParameter("phone");
 
+        fullname = (fullname != null) ? fullname.trim() : "";
+        phone = (phone != null) ? phone.trim() : "";
+
+        if (fullname.isEmpty()) {
+            req.setAttribute("error", "Họ và tên không được để trống!");
+            req.setAttribute("user", currentUser);
+            req.getRequestDispatcher("/views/user/profile.jsp").forward(req, resp);
+            return;
+        }
+
+        if (fullname.length() < 2 || fullname.length() > 100) {
+            req.setAttribute("error", "Họ và tên phải có độ dài từ 2 đến 100 ký tự!");
+            req.setAttribute("user", currentUser);
+            req.getRequestDispatcher("/views/user/profile.jsp").forward(req, resp);
+            return;
+        }
+
+        // Validate số điện thoại định dạng chuẩn Việt Nam: 10 số, bắt đầu bằng 0
+        if (!phone.isEmpty() && !phone.matches("^0[0-9]{9}$")) {
+            req.setAttribute("error", "Số điện thoại không đúng định dạng! Vui lòng nhập 10 chữ số bắt đầu bằng số 0 (ví dụ: 0912345678).");
+            req.setAttribute("user", currentUser);
+            req.getRequestDispatcher("/views/user/profile.jsp").forward(req, resp);
+            return;
+        }
+
         // Xử lý upload file hình ảnh đại diện qua Multipart
         String fname = null;
         try {
             Part part = req.getPart("imageFile");
             if (part != null && part.getSize() > 0) {
+                // Kiểm tra dung lượng file (tối đa 5MB)
+                if (part.getSize() > 5 * 1024 * 1024) {
+                    req.setAttribute("error", "Kích thước ảnh đại diện vượt quá giới hạn cho phép (tối đa 5MB)!");
+                    req.setAttribute("user", currentUser);
+                    req.getRequestDispatcher("/views/user/profile.jsp").forward(req, resp);
+                    return;
+                }
+
                 String submittedName = Paths.get(part.getSubmittedFileName()).getFileName().toString();
                 int dotIndex = submittedName.lastIndexOf(".");
-                String ext = (dotIndex >= 0) ? submittedName.substring(dotIndex) : ".png";
+                String ext = (dotIndex >= 0) ? submittedName.substring(dotIndex).toLowerCase() : "";
+
+                // Kiểm tra định dạng đuôi file
+                if (!ext.equals(".png") && !ext.equals(".jpg") && !ext.equals(".jpeg") && !ext.equals(".webp")) {
+                    req.setAttribute("error", "Định dạng file không hợp lệ! Chỉ chấp nhận file ảnh (.jpg, .jpeg, .png, .webp).");
+                    req.setAttribute("user", currentUser);
+                    req.getRequestDispatcher("/views/user/profile.jsp").forward(req, resp);
+                    return;
+                }
+
                 fname = System.currentTimeMillis() + ext;
 
                 File uploadDir = new File(Constant.UPLOAD_DIR);
@@ -100,6 +142,9 @@ public class ProfileController extends HttpServlet {
         } catch (Exception e) {
             e.printStackTrace();
             req.setAttribute("error", "Lỗi trong quá trình upload file: " + e.getMessage());
+            req.setAttribute("user", currentUser);
+            req.getRequestDispatcher("/views/user/profile.jsp").forward(req, resp);
+            return;
         }
 
         try {

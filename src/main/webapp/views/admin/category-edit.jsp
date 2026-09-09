@@ -88,17 +88,26 @@
             <p class="page-subtitle">Chỉnh sửa thông tin chi tiết danh mục #${cate.categoryId}</p>
         </div>
 
+        <c:if test="${not empty error}">
+            <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm d-flex align-items-center gap-2 mb-4" role="alert">
+                <i class="fa-solid fa-triangle-exclamation fs-5 text-danger"></i>
+                <div><strong>Lỗi nhập liệu:</strong> <c:out value="${error}"/></div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </c:if>
+
         <div class="card-custom">
             <div class="card-custom-header">
                 <i class="fa-solid fa-pen-to-square text-primary me-2"></i> Chỉnh Sửa Danh Mục: ${cate.categoryname}
             </div>
             <div class="card-custom-body">
-                <form action="<c:url value='/admin/category/update'/>" method="post" enctype="multipart/form-data">
+                <form action="<c:url value='/admin/category/update'/>" method="post" enctype="multipart/form-data" class="needs-validation" novalidate id="categoryEditForm">
                     <input type="hidden" name="categoryid" value="${cate.categoryId}">
 
                     <div class="mb-4">
                         <label class="form-label fw-semibold text-secondary small">Tên Danh Mục <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control form-control-lg" name="categoryname" value="${cate.categoryname}" required>
+                        <input type="text" class="form-control form-control-lg" name="categoryname" value="${cate.categoryname}" required minlength="2" maxlength="200">
+                        <div class="invalid-feedback">Tên danh mục là bắt buộc và phải có độ dài từ 2 đến 200 ký tự.</div>
                     </div>
 
                     <div class="mb-4">
@@ -112,7 +121,8 @@
                     <div class="row g-3 mb-4">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-secondary small">Tải Ảnh Mới Thay Thế (Tùy chọn)</label>
-                            <input type="file" class="form-control" name="images1" accept="image/*">
+                            <input type="file" class="form-control" name="images1" id="categoryEditImageFile" accept=".jpg,.jpeg,.png,.webp">
+                            <div class="form-text small">Chấp nhận JPG, PNG, WEBP (tối đa 5MB)</div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold text-secondary small">Hoặc Cập Nhật Đường Dẫn URL Ảnh</label>
@@ -146,5 +156,39 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('categoryEditForm');
+            const fileInput = document.getElementById('categoryEditImageFile');
+
+            if (fileInput) {
+                fileInput.addEventListener('change', function () {
+                    const file = this.files[0];
+                    if (file) {
+                        const validExts = ['.jpg', '.jpeg', '.png', '.webp'];
+                        const name = file.name.toLowerCase();
+                        if (!validExts.some(ext => name.endsWith(ext))) {
+                            alert('Định dạng ảnh không hợp lệ! Vui lòng chọn .jpg, .jpeg, .png hoặc .webp');
+                            this.value = '';
+                            return;
+                        }
+                        if (file.size > 5 * 1024 * 1024) {
+                            alert('Dung lượng ảnh vượt quá 5MB!');
+                            this.value = '';
+                        }
+                    }
+                });
+            }
+
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    </script>
 </body>
 </html>

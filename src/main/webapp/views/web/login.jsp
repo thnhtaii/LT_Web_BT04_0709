@@ -85,23 +85,27 @@
             </div>
         </c:if>
 
-        <form action="<c:url value='/login'/>" method="POST">
+        <form action="<c:url value='/login'/>" method="POST" class="needs-validation" novalidate id="loginForm">
             <div class="mb-3">
-                <label class="form-label small fw-semibold text-secondary">Tên đăng nhập hoặc Email</label>
-                <div class="input-group">
+                <label class="form-label small fw-semibold text-secondary">Tên đăng nhập hoặc Email <span class="text-danger">*</span></label>
+                <div class="input-group has-validation">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-regular fa-user text-muted"></i></span>
-                    <input type="text" name="username" class="form-control border-start-0" placeholder="username hoặc email" value="${username}" required>
+                    <input type="text" name="username" class="form-control border-start-0" 
+                           placeholder="username hoặc email" value="${username}" required minlength="3">
+                    <div class="invalid-feedback">Vui lòng nhập tên đăng nhập hoặc địa chỉ email.</div>
                 </div>
             </div>
 
             <div class="mb-3">
                 <div class="d-flex justify-content-between">
-                    <label class="form-label small fw-semibold text-secondary">Mật khẩu</label>
+                    <label class="form-label small fw-semibold text-secondary">Mật khẩu <span class="text-danger">*</span></label>
                     <a href="<c:url value='/forgot-password'/>" class="small text-decoration-none text-primary">Quên mật khẩu?</a>
                 </div>
-                <div class="input-group">
+                <div class="input-group has-validation">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-muted"></i></span>
-                    <input type="password" name="password" class="form-control border-start-0" placeholder="••••••••" required>
+                    <input type="password" name="password" class="form-control border-start-0" 
+                           placeholder="••••••••" required minlength="6">
+                    <div class="invalid-feedback">Vui lòng nhập mật khẩu (tối thiểu 6 ký tự).</div>
                 </div>
             </div>
 
@@ -121,6 +125,19 @@
             </a>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('loginForm');
+            form.addEventListener('submit', function (event) {
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    </script>
 
 
 </body>

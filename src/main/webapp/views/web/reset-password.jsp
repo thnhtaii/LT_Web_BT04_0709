@@ -78,33 +78,41 @@
             </div>
         </c:if>
 
-        <form action="<c:url value='/reset-password'/>" method="POST">
+        <form action="<c:url value='/reset-password'/>" method="POST" class="needs-validation" novalidate id="resetForm">
             <div class="mb-3">
-                <label class="form-label small fw-semibold text-secondary">Email tài khoản</label>
-                <div class="input-group">
+                <label class="form-label small fw-semibold text-secondary">Email tài khoản <span class="text-danger">*</span></label>
+                <div class="input-group has-validation">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-regular fa-envelope text-muted"></i></span>
-                    <input type="email" name="email" class="form-control border-start-0" value="${email != null ? email : sessionScope.resetEmail}" placeholder="email@domain.com" required>
+                    <input type="email" name="email" class="form-control border-start-0" 
+                           value="${email != null ? email : sessionScope.resetEmail}" placeholder="email@domain.com" required>
+                    <div class="invalid-feedback">Vui lòng nhập địa chỉ email hợp lệ.</div>
                 </div>
             </div>
 
             <div class="mb-3">
-                <label class="form-label small fw-semibold text-secondary">Mã OTP (6 số)</label>
-                <input type="text" name="otp" class="form-control otp-input" maxlength="6" placeholder="------" pattern="[0-9]{6}" required autofocus>
+                <label class="form-label small fw-semibold text-secondary">Mã OTP (6 số) <span class="text-danger">*</span></label>
+                <input type="text" name="otp" id="resetOtpInput" class="form-control otp-input" maxlength="6" 
+                       placeholder="------" pattern="^\d{6}$" inputmode="numeric" required autofocus>
+                <div class="invalid-feedback text-center">Vui lòng nhập đúng 6 chữ số OTP.</div>
             </div>
 
             <div class="mb-3">
-                <label class="form-label small fw-semibold text-secondary">Mật khẩu mới</label>
-                <div class="input-group">
+                <label class="form-label small fw-semibold text-secondary">Mật khẩu mới <span class="text-danger">*</span></label>
+                <div class="input-group has-validation">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-muted"></i></span>
-                    <input type="password" name="newPassword" class="form-control border-start-0" placeholder="Tối thiểu 6 ký tự" minlength="6" required>
+                    <input type="password" name="newPassword" id="newPassword" class="form-control border-start-0" 
+                           placeholder="Tối thiểu 6 ký tự" minlength="6" required>
+                    <div class="invalid-feedback">Mật khẩu mới phải có ít nhất 6 ký tự.</div>
                 </div>
             </div>
 
             <div class="mb-4">
-                <label class="form-label small fw-semibold text-secondary">Xác nhận mật khẩu mới</label>
-                <div class="input-group">
+                <label class="form-label small fw-semibold text-secondary">Xác nhận mật khẩu mới <span class="text-danger">*</span></label>
+                <div class="input-group has-validation">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-shield-halved text-muted"></i></span>
-                    <input type="password" name="confirmPassword" class="form-control border-start-0" placeholder="Nhập lại mật khẩu mới" minlength="6" required>
+                    <input type="password" name="confirmPassword" id="confirmPassword" class="form-control border-start-0" 
+                           placeholder="Nhập lại mật khẩu mới" minlength="6" required>
+                    <div class="invalid-feedback">Mật khẩu xác nhận không khớp với mật khẩu mới.</div>
                 </div>
             </div>
 
@@ -119,6 +127,39 @@
             </a>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('resetForm');
+            const otpInput = document.getElementById('resetOtpInput');
+            const newPwd = document.getElementById('newPassword');
+            const confirmPwd = document.getElementById('confirmPassword');
+
+            otpInput.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+            });
+
+            function checkMatch() {
+                if (confirmPwd.value && newPwd.value !== confirmPwd.value) {
+                    confirmPwd.setCustomValidity('Mật khẩu không khớp!');
+                } else {
+                    confirmPwd.setCustomValidity('');
+                }
+            }
+
+            newPwd.addEventListener('input', checkMatch);
+            confirmPwd.addEventListener('input', checkMatch);
+
+            form.addEventListener('submit', function (event) {
+                checkMatch();
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    </script>
 
 
 </body>

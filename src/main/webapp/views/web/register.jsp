@@ -71,45 +71,55 @@
             </div>
         </c:if>
 
-        <form action="<c:url value='/register'/>" method="POST">
+        <form action="<c:url value='/register'/>" method="POST" class="needs-validation" novalidate id="registerForm">
             <div class="mb-3">
                 <label class="form-label small fw-semibold text-secondary">Tên đăng nhập <span class="text-danger">*</span></label>
-                <div class="input-group">
+                <div class="input-group has-validation">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-regular fa-user text-muted"></i></span>
-                    <input type="text" name="username" class="form-control border-start-0" placeholder="ví dụ: nguyenvana" value="${username}" required>
+                    <input type="text" name="username" class="form-control border-start-0" placeholder="ví dụ: nguyenvana" 
+                           value="${username}" required minlength="3" maxlength="30" pattern="^[a-zA-Z0-9_]{3,30}$">
+                    <div class="invalid-feedback">Tên đăng nhập từ 3 - 30 ký tự, chỉ chứa chữ cái, số và dấu gạch dưới (_).</div>
                 </div>
             </div>
 
             <div class="mb-3">
-                <label class="form-label small fw-semibold text-secondary">Họ và tên</label>
-                <div class="input-group">
+                <label class="form-label small fw-semibold text-secondary">Họ và tên <span class="text-danger">*</span></label>
+                <div class="input-group has-validation">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-id-card text-muted"></i></span>
-                    <input type="text" name="fullname" class="form-control border-start-0" placeholder="Nguyễn Văn A" value="${fullname}">
+                    <input type="text" name="fullname" class="form-control border-start-0" placeholder="Nguyễn Văn A" 
+                           value="${fullname}" required minlength="2" maxlength="100">
+                    <div class="invalid-feedback">Vui lòng nhập họ và tên của bạn (2 - 100 ký tự).</div>
                 </div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label small fw-semibold text-secondary">Email nhận mã OTP <span class="text-danger">*</span></label>
-                <div class="input-group">
+                <div class="input-group has-validation">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-regular fa-envelope text-muted"></i></span>
-                    <input type="email" name="email" class="form-control border-start-0" placeholder="email@domain.com" value="${email}" required>
+                    <input type="email" name="email" class="form-control border-start-0" placeholder="email@domain.com" 
+                           value="${email}" required pattern="^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$">
+                    <div class="invalid-feedback">Vui lòng nhập địa chỉ email hợp lệ (ví dụ: user@example.com).</div>
                 </div>
                 <div class="form-text small">Mã OTP kích hoạt sẽ gửi đến địa chỉ email này.</div>
             </div>
 
             <div class="mb-3">
                 <label class="form-label small fw-semibold text-secondary">Mật khẩu <span class="text-danger">*</span></label>
-                <div class="input-group">
+                <div class="input-group has-validation">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-muted"></i></span>
-                    <input type="password" name="password" class="form-control border-start-0" placeholder="Tối thiểu 6 ký tự" required minlength="6">
+                    <input type="password" name="password" id="password" class="form-control border-start-0" 
+                           placeholder="Tối thiểu 6 ký tự" required minlength="6">
+                    <div class="invalid-feedback">Mật khẩu phải có độ dài tối thiểu từ 6 ký tự trở lên.</div>
                 </div>
             </div>
 
             <div class="mb-4">
                 <label class="form-label small fw-semibold text-secondary">Xác nhận mật khẩu <span class="text-danger">*</span></label>
-                <div class="input-group">
+                <div class="input-group has-validation">
                     <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-shield-halved text-muted"></i></span>
-                    <input type="password" name="confirmPassword" class="form-control border-start-0" placeholder="Nhập lại mật khẩu" required minlength="6">
+                    <input type="password" name="confirmPassword" id="confirmPassword" class="form-control border-start-0" 
+                           placeholder="Nhập lại mật khẩu" required minlength="6">
+                    <div class="invalid-feedback" id="confirmFeedback">Mật khẩu xác nhận không trùng khớp!</div>
                 </div>
             </div>
 
@@ -129,6 +139,34 @@
             </a>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const form = document.getElementById('registerForm');
+            const pwd = document.getElementById('password');
+            const confirmPwd = document.getElementById('confirmPassword');
+
+            function checkPasswordMatch() {
+                if (confirmPwd.value && pwd.value !== confirmPwd.value) {
+                    confirmPwd.setCustomValidity('Mật khẩu không khớp!');
+                } else {
+                    confirmPwd.setCustomValidity('');
+                }
+            }
+
+            pwd.addEventListener('input', checkPasswordMatch);
+            confirmPwd.addEventListener('input', checkPasswordMatch);
+
+            form.addEventListener('submit', function (event) {
+                checkPasswordMatch();
+                if (!form.checkValidity()) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    </script>
 
 
 </body>

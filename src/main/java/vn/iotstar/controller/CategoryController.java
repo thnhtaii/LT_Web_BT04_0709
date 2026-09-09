@@ -72,6 +72,7 @@ public class CategoryController extends HttpServlet {
 
         if (url.contains("/admin/category/insert")) {
             String categoryname = req.getParameter("categoryname");
+            categoryname = (categoryname != null) ? categoryname.trim() : "";
             String statusParam = req.getParameter("status");
             int status = 1;
             if (statusParam != null && !statusParam.isEmpty()) {
@@ -83,6 +84,13 @@ public class CategoryController extends HttpServlet {
             }
             String images = req.getParameter("images");
 
+            if (categoryname.isEmpty() || categoryname.length() < 2 || categoryname.length() > 200) {
+                req.setAttribute("error", "Tên danh mục bắt buộc phải từ 2 đến 200 ký tự!");
+                req.setAttribute("categoryname", categoryname);
+                req.getRequestDispatcher("/views/admin/category-add.jsp").forward(req, resp);
+                return;
+            }
+
             Category category = new Category();
             category.setCategoryname(categoryname);
             category.setStatus(status);
@@ -91,23 +99,37 @@ public class CategoryController extends HttpServlet {
             String uploadPath = Constant.DIR;
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists())
-                uploadDir.mkdir();
+                uploadDir.mkdirs();
 
             try {
                 Part part = req.getPart("images1");
-                if (part.getSize() > 0) {
+                if (part != null && part.getSize() > 0) {
+                    if (part.getSize() > 5 * 1024 * 1024) {
+                        req.setAttribute("error", "Dung lượng ảnh danh mục vượt quá 5MB!");
+                        req.setAttribute("categoryname", categoryname);
+                        req.getRequestDispatcher("/views/admin/category-add.jsp").forward(req, resp);
+                        return;
+                    }
+
                     String filename = Paths.get(part.getSubmittedFileName()).getFileName().toString();
                     int index = filename.lastIndexOf(".");
-                    String ext = filename.substring(index + 1);
-                    fname = System.currentTimeMillis() + "." + ext;
-                    part.write(uploadPath + "/" + fname);
+                    String ext = (index >= 0) ? filename.substring(index).toLowerCase() : "";
+                    if (!ext.equals(".png") && !ext.equals(".jpg") && !ext.equals(".jpeg") && !ext.equals(".webp")) {
+                        req.setAttribute("error", "Định dạng file không hợp lệ! Chỉ chấp nhận ảnh (.jpg, .jpeg, .png, .webp).");
+                        req.setAttribute("categoryname", categoryname);
+                        req.getRequestDispatcher("/views/admin/category-add.jsp").forward(req, resp);
+                        return;
+                    }
+
+                    fname = System.currentTimeMillis() + ext;
+                    part.write(uploadPath + File.separator + fname);
                     category.setImages(fname);
-                } else if (images != null && !images.isEmpty()) {
-                    category.setImages(images);
+                } else if (images != null && !images.trim().isEmpty()) {
+                    category.setImages(images.trim());
                 } else {
-                    category.setImages("avatar.png");
+                    category.setImages("https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500");
                 }
-            } catch (FileNotFoundException fne) {
+            } catch (Exception fne) {
                 fne.printStackTrace();
             }
 
@@ -116,8 +138,16 @@ public class CategoryController extends HttpServlet {
         }
 
         if (url.contains("/admin/category/update")) {
-            int categoryid = Integer.parseInt(req.getParameter("categoryid"));
+            int categoryid = 0;
+            try {
+                categoryid = Integer.parseInt(req.getParameter("categoryid"));
+            } catch (NumberFormatException e) {
+                resp.sendRedirect(req.getContextPath() + "/admin/categories");
+                return;
+            }
+
             String categoryname = req.getParameter("categoryname");
+            categoryname = (categoryname != null) ? categoryname.trim() : "";
             String statusParam = req.getParameter("status");
             int status = 1;
             if (statusParam != null && !statusParam.isEmpty()) {
@@ -130,6 +160,18 @@ public class CategoryController extends HttpServlet {
             String images = req.getParameter("images");
 
             Category category = cateService.findById(categoryid);
+            if (category == null) {
+                resp.sendRedirect(req.getContextPath() + "/admin/categories");
+                return;
+            }
+
+            if (categoryname.isEmpty() || categoryname.length() < 2 || categoryname.length() > 200) {
+                req.setAttribute("error", "Tên danh mục bắt buộc phải từ 2 đến 200 ký tự!");
+                req.setAttribute("category", category);
+                req.getRequestDispatcher("/views/admin/category-edit.jsp").forward(req, resp);
+                return;
+            }
+
             String fileold = category.getImages();
             category.setCategoryname(categoryname);
             category.setStatus(status);
@@ -138,28 +180,41 @@ public class CategoryController extends HttpServlet {
             String uploadPath = Constant.DIR;
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists())
-                uploadDir.mkdir();
+                uploadDir.mkdirs();
 
             try {
                 Part part = req.getPart("images1");
-                if (part.getSize() > 0) {
-                    if (fileold != null && !fileold.isEmpty() && fileold.length() >= 5
-                            && !fileold.substring(0, 5).equals("https")) {
-                        deleteFile(uploadPath + "\\" + fileold);
+                if (part != null && part.getSize() > 0) {
+                    if (part.getSize() > 5 * 1024 * 1024) {
+                        req.setAttribute("error", "Dung lượng ảnh danh mục vượt quá 5MB!");
+                        req.setAttribute("category", category);
+                        req.getRequestDispatcher("/views/admin/category-edit.jsp").forward(req, resp);
+                        return;
                     }
 
                     String filename = Paths.get(part.getSubmittedFileName()).getFileName().toString();
                     int index = filename.lastIndexOf(".");
-                    String ext = filename.substring(index + 1);
-                    fname = System.currentTimeMillis() + "." + ext;
-                    part.write(uploadPath + "/" + fname);
+                    String ext = (index >= 0) ? filename.substring(index).toLowerCase() : "";
+                    if (!ext.equals(".png") && !ext.equals(".jpg") && !ext.equals(".jpeg") && !ext.equals(".webp")) {
+                        req.setAttribute("error", "Định dạng file không hợp lệ! Chỉ chấp nhận ảnh (.jpg, .jpeg, .png, .webp).");
+                        req.setAttribute("category", category);
+                        req.getRequestDispatcher("/views/admin/category-edit.jsp").forward(req, resp);
+                        return;
+                    }
+
+                    if (fileold != null && !fileold.isEmpty() && !fileold.startsWith("http")) {
+                        deleteFile(uploadPath + File.separator + fileold);
+                    }
+
+                    fname = System.currentTimeMillis() + ext;
+                    part.write(uploadPath + File.separator + fname);
                     category.setImages(fname);
-                } else if (images != null && !images.isEmpty()) {
-                    category.setImages(images);
+                } else if (images != null && !images.trim().isEmpty()) {
+                    category.setImages(images.trim());
                 } else {
                     category.setImages(fileold);
                 }
-            } catch (FileNotFoundException fne) {
+            } catch (Exception fne) {
                 fne.printStackTrace();
             }
 
