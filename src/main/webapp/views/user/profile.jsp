@@ -30,7 +30,7 @@
             box-shadow: 0 8px 20px rgba(79, 70, 229, 0.18);
         }
 
-        .btn-upload-badge {
+        .btn-upload-badge, .camera-badge {
             position: absolute;
             bottom: 6px;
             right: 6px;
@@ -48,7 +48,7 @@
             transition: transform 0.2s, background 0.2s;
         }
 
-        .btn-upload-badge:hover {
+        .btn-upload-badge:hover, .camera-badge:hover {
             transform: scale(1.1);
             background: #4338ca;
             color: #ffffff;

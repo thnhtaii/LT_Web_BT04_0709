@@ -134,9 +134,7 @@ public class User implements Serializable {
 
     public void setImages(String images) {
         this.images = images;
-        if (this.avatar == null || this.avatar.isEmpty()) {
-            this.avatar = images;
-        }
+        this.avatar = images;
     }
 
     public String getAvatar() {
@@ -145,9 +143,7 @@ public class User implements Serializable {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
-        if (this.images == null || this.images.isEmpty()) {
-            this.images = avatar;
-        }
+        this.images = avatar;
     }
 
     public int getRoleId() {

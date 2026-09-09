@@ -23,7 +23,7 @@ import vn.iotstar.utils.Constant;
     maxFileSize = 1024 * 1024 * 10,       // 10MB
     maxRequestSize = 1024 * 1024 * 50     // 50MB
 )
-@WebServlet(urlPatterns = { "/profile", "/profile/edit" })
+@WebServlet(urlPatterns = { "/profile", "/profile/edit", "/user/profile" })
 public class ProfileController extends HttpServlet {
 
     private static final long serialVersionUID = 1L;
@@ -152,6 +152,7 @@ public class ProfileController extends HttpServlet {
             currentUser.setPhone(phone);
             if (fname != null) {
                 currentUser.setImages(fname);
+                currentUser.setAvatar(fname);
             }
 
             userService.update(currentUser);
